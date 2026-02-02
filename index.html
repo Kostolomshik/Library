@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Просмотр книги</title>
+    <link rel="stylesheet" href="css/dflip.min.css">
+    <!-- Стили для того, чтобы книга была на весь экран -->
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        #book-viewer { height: 100vh; }
+    </style>
+</head>
+<body>
+
+<div id="book-viewer"></div>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/dflip.min.js"></script>
+
+<script>
+    // Магия: берем имя файла из ссылки. Например: index.html?book=biology
+    const params = new URLSearchParams(window.location.search);
+    const bookName = params.get('book');
+
+    if (bookName) {
+        jQuery(document).ready(function () {
+            jQuery("#book-viewer").dfFlipbook({
+                source: "pdfs/" + bookName + ".pdf",
+                webgl: true, // Включает 3D
+                hard: "all", // Делает страницы "жесткими", если нужно
+                soundEnable: true // Звук перелистывания
+            });
+        });
+    } else {
+        document.body.innerHTML = "<h1>Книга не найдена. Проверьте ссылку.</h1>";
+    }
+</script>
+</body>
+</html>

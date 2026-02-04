@@ -2,39 +2,59 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Просмотр книги</title>
-    <link rel="stylesheet" href="css/dflip.min.css">
-    <!-- Стили для того, чтобы книга была на весь экран -->
+    <title>Диагностика книги</title>
+    <!-- Подключаем скрипты только из интернета, чтобы исключить ошибки в твоих папках js/css -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/clsource/dflip-lite-samples@master/css/dflip.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/clsource/dflip-lite-samples@master/css/themify-icons.css">
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-        #book-viewer { height: 100vh; }
+        body { background: #1a1a1a; color: white; font-family: sans-serif; padding: 20px; }
+        #book-viewer { height: 80vh; border: 2px solid #ff0000; margin-top: 10px; }
+        .log { background: #000; padding: 10px; border: 1px solid #555; font-family: monospace; font-size: 13px; color: #00ff00; }
     </style>
 </head>
 <body>
 
-<div id="book-viewer"></div>
+    <h3>Отладка загрузки:</h3>
+    <div id="debug-log" class="log">Инициализация...</div>
+    
+    <div id="book-viewer"></div>
 
-<!-- Используем прямые ссылки на скрипты, чтобы точно работало -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/clsource/dflip-lite-samples@master/js/dflip.min.js"></script>
+    <!-- Библиотеки -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/clsource/dflip-lite-samples@master/js/dflip.min.js"></script>
 
-<script>
-    // Магия: берем имя файла из ссылки. Например: index.html?book=biology
-    const params = new URLSearchParams(window.location.search);
-    const bookName = params.get('book');
+    <script>
+        const log = document.getElementById('debug-log');
+        function print(msg) { log.innerHTML += "<br>> " + msg; }
 
-    if (bookName) {
+        // --- НАСТРОЙКА ТУТ ---
+        const myFile = 'biology'; // НАПИШИ ТУТ ИМЯ СВОЕГО ФАЙЛА БЕЗ .pdf
+        const myPath = "pdfs/" + myFile + ".pdf";
+        // ----------------------
+
+        print("Проверка файла: " + myPath);
+
         jQuery(document).ready(function () {
-            jQuery("#book-viewer").dfFlipbook({
-                source: "pdfs/" + bookName + ".pdf",
-                webgl: true, // Включает 3D
-                hard: "all", // Делает страницы "жесткими", если нужно
-                soundEnable: true // Звук перелистывания
+            print("jQuery готов.");
+            
+            // Проверяем, существует ли файл физически (тест запросом)
+            fetch(myPath).then(response => {
+                if (response.ok) {
+                    print("Файл найден на сервере! Запускаю 3D...");
+                    
+                    jQuery("#book-viewer").dfFlipbook({
+                        source: myPath,
+                        webgl: true,
+                        soundEnable: true,
+                        onFlip: function() { console.log("Перевернули!"); }
+                    });
+                } else {
+                    print("ОШИБКА 404: Файл '" + myPath + "' не найден в папке pdfs. Проверь буквы и расширение!");
+                }
+            }).catch(err => {
+                print("ОШИБКА СЕТИ: " + err);
             });
         });
-    } else {
-        document.body.innerHTML = "<h1>Книга не найдена. Проверьте ссылку.</h1>";
-    }
-</script>
+    </script>
 </body>
 </html>

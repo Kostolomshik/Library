@@ -2,57 +2,46 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Диагностика книги</title>
-    <!-- Подключаем скрипты только из интернета, чтобы исключить ошибки в твоих папках js/css -->
+    <title>Моя Книга</title>
+    <!-- Подключаем всё из интернета, чтобы папки js и css не мешались -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/clsource/dflip-lite-samples@master/css/dflip.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/clsource/dflip-lite-samples@master/css/themify-icons.css">
     <style>
-        body { background: #1a1a1a; color: white; font-family: sans-serif; padding: 20px; }
-        #book-viewer { height: 80vh; border: 2px solid #ff0000; margin-top: 10px; }
-        .log { background: #000; padding: 10px; border: 1px solid #555; font-family: monospace; font-size: 13px; color: #00ff00; }
+        body, html { margin: 0; padding: 0; height: 100%; background-color: #333; overflow: hidden; }
+        #book-container { height: 100vh; width: 100vw; }
+        #error-msg { color: white; text-align: center; margin-top: 50px; font-family: sans-serif; display: none; }
     </style>
 </head>
 <body>
 
-    <h3>Отладка загрузки:</h3>
-    <div id="debug-log" class="log">Инициализация...</div>
-    
-    <div id="book-viewer"></div>
+    <div id="error-msg">
+        <h1>Упс! Файл не найден.</h1>
+        <p>Убедись, что в папке <b>pdfs</b> лежит файл с названием <b>book.pdf</b></p>
+    </div>
+
+    <div id="book-container"></div>
 
     <!-- Библиотеки -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/clsource/dflip-lite-samples@master/js/dflip.min.js"></script>
 
     <script>
-        const log = document.getElementById('debug-log');
-        function print(msg) { log.innerHTML += "<br>> " + msg; }
-
-        // --- НАСТРОЙКА ТУТ ---
-        const myFile = 'Book'; // НАПИШИ ТУТ ИМЯ СВОЕГО ФАЙЛА БЕЗ .pdf
-        const myPath = "pdfs/" + myFile + ".pdf";
-        // ----------------------
-
-        print("Проверка файла: " + myPath);
-
         jQuery(document).ready(function () {
-            print("jQuery готов.");
-            
-            // Проверяем, существует ли файл физически (тест запросом)
-            fetch(myPath).then(response => {
+            const fixedPath = "pdfs/book.pdf"; // Ищем только этот файл
+
+            // Проверяем, есть ли файл, прежде чем запускать
+            fetch(fixedPath).then(response => {
                 if (response.ok) {
-                    print("Файл найден на сервере! Запускаю 3D...");
-                    
-                    jQuery("#book-viewer").dfFlipbook({
-                        source: myPath,
+                    jQuery("#book-container").dfFlipbook({
+                        source: fixedPath,
                         webgl: true,
-                        soundEnable: true,
-                        onFlip: function() { console.log("Перевернули!"); }
+                        soundEnable: true
                     });
                 } else {
-                    print("ОШИБКА 404: Файл '" + myPath + "' не найден в папке pdfs. Проверь буквы и расширение!");
+                    document.getElementById('error-msg').style.display = 'block';
                 }
-            }).catch(err => {
-                print("ОШИБКА СЕТИ: " + err);
+            }).catch(() => {
+                document.getElementById('error-msg').style.display = 'block';
             });
         });
     </script>
